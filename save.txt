@@ -1,0 +1,277 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\OrderResource\Pages;
+use App\Filament\Resources\OrderResource\RelationManagers;
+use App\Models\Order;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use App\Models\Setting;
+use App\Models\User;
+use App\Enums\UserType;
+use App\Enums\OrderStatus;
+use App\Models\Coupon;
+use App\Models\UserCoupons;
+use Filament\Notifications\Notification;
+use App\Models\City;
+use App\Models\Area;
+
+class OrderResource extends Resource
+{
+    protected static ?string $model = Order::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Select::make('user_id')
+                    ->label(__('message.User'))
+                    ->options(function () {
+                        return User::where('user_type', UserType::USER)->get()->mapWithKeys(function ($user) {
+                            return [
+                                $user->id => $user->phone ? $user->name . '- ' . $user->phone : $user->name,
+                            ];
+                        });
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->columnSpanFull(),
+                Forms\Components\Select::make('deliveryman_id')
+                    ->label(__('message.Deliveryman'))
+                    ->options(function () {
+                        return User::where('user_type', UserType::DELIVERYMAN)->get()->mapWithKeys(function ($user) {
+                            return [
+                                $user->id => $user->name . ' - ' . $user->phone,
+                            ];
+                        });
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->visible(fn() => Setting::where('key', 'deliveryman')->value('value') === '1')
+                    ->default(null)
+                    ->columnSpanFull(),
+                Forms\Components\Select::make('status')
+                    ->label(__('message.Status'))
+                    ->options(function () {
+                        $statuses = [
+                            OrderStatus::PENDING->value => __('message.Pending'),
+                            OrderStatus::CONFIRMED->value => __('message.Confirmed'),
+                            OrderStatus::PREPARING->value => __('message.Preparing'),
+                            OrderStatus::READY->value => __('message.Ready'),
+                        ];
+                        if (Setting::where('key', 'deliveryman')->value('value') === '1') {
+                            $statuses += [
+                                OrderStatus::ONDELIVERY->value => __('message.On Delivery'),
+                                OrderStatus::DELIVERED->value => __('message.Delivered'),
+                            ];
+                        }
+                        $statuses += [
+                            OrderStatus::CANCELED->value => __('message.Canceled'),
+                        ];
+                        return $statuses;
+                    })
+                    ->required()
+                    ->columnSpanFull(),
+                Forms\Components\Select::make('payment_method')
+                    ->label(__('message.Payment Method'))
+                    ->options([
+                        'cash' => __('message.Cash'),
+                        'online' => __('message.Online'),
+                    ])
+                    ->required(),
+                Forms\Components\Select::make('payment_status')
+                    ->label(__('message.Payment Status'))
+                    ->options([
+                        'paid' => __('message.Paid'),
+                        'unpaid' => __('message.Unpaid'),
+                    ])
+                    ->required(),
+                Forms\Components\Textarea::make('address')
+                    ->label(__('message.Address'))
+                    ->required()
+                    ->maxLength(255)
+                    ->default(null)
+                    ->columnSpanFull(),
+                Forms\Components\Textarea::make('notes')
+                    ->label(__('message.Notes'))
+                    ->columnSpanFull(),
+                Forms\Components\Select::make('coupon_id')
+                    ->label(__('message.Coupon'))
+                    ->options(Coupon::where('expiry_date', '>', now())->pluck('code', 'id'))
+                    ->default(null)
+                    ->afterStateUpdated(function ($state, $set, $get) {
+                        $userId = $get('user_id');
+                        if ($userId && $state) {
+                            $couponCount = UserCoupons::where('coupon_id', $state)->count();
+                            if ($couponCount >= Coupon::find($state)->usage_limit) {
+                                Notification::make()
+                                    ->warning()
+                                    ->title(__('Coupon Limit Reached'))
+                                    ->body(__('This coupon has reached its maximum usage limit.'))
+                                    ->send();
+                            }
+                            $userCoupon = UserCoupons::where('user_id', $userId)->where('coupon_id', $state)->first();
+                            if ($userCoupon && $userCoupon) {
+                                Notification::make()
+                                    ->warning()
+                                    ->title(__('Coupon Already Used'))
+                                    ->body(__('This user has already used this coupon.'))
+                                    ->send();
+                            }
+                            UserCoupons::Create(
+                                [
+                                    'user_id' => $userId,
+                                    'coupon_id' => $state,
+                                    'is_used' => true,
+                                    'used_at' => now(),
+                                ],
+                            );
+                        }
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->columnSpanFull(),
+                Forms\Components\Hidden::make('discount')
+                    ->label(__('message.Discount'))
+                    ->default(0.00),
+                Forms\Components\Select::make('city_id')
+                    ->label(__('message.City'))
+                    ->options(fn() => City::all()->mapWithKeys(function ($city) {
+                        return [$city->id => app()->getLocale() == 'ar' ? $city->name_ar : $city->name_en];
+                    }))
+                    ->searchable()
+                    ->preload()
+                    ->default(null)
+                    ->columnSpanFull(),
+                Forms\Components\Select::make('area_id')
+                    ->label(__('message.Area'))
+                    ->options(fn() => Area::all()->mapWithKeys(function ($city) {
+                        return [$city->id => app()->getLocale() == 'ar' ? $city->name_ar : $city->name_en];
+                    }))
+                    ->searchable()
+                    ->preload()
+                    ->default(null)
+                    ->visible(fn() => Setting::where('key', 'deliveryman')
+                        ->value('value') === '1' && Setting::where('key', 'delivery_fee_type')
+                        ->value('value') === 'area')
+                    ->columnSpanFull(),
+                Forms\Components\TextInput::make('total')
+                    ->required()
+                    ->numeric()
+                    ->default(0.00)
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->hiddenOn('create')
+                    ->columnSpanFull(),
+                Forms\Components\Fieldset::make('Location')
+                    ->label(__('message.Location'))
+                    ->schema([
+                        Forms\Components\View::make('filament.components.map-picker')
+                            ->live()
+                            ->afterStateUpdated(function ($state, $set) {
+                                $set('latitude', $state['latitude']);
+                                $set('longitude', $state['longitude']);
+                            })
+                            ->viewData([
+                                'latitude' => fn($get) => $get('latitude'),
+                                'longitude' => fn($get) => $get('longitude'),
+                            ])
+                            ->columnSpanFull(),
+
+                        Forms\Components\TextInput::make('latitude')
+                            ->required()
+                            ->hidden()
+                            ->live(),
+
+                        Forms\Components\TextInput::make('longitude')
+                            ->required()
+                            ->hidden()
+                            ->live(),
+                    ])
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('deliveryman_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status'),
+                Tables\Columns\TextColumn::make('payment_method'),
+                Tables\Columns\TextColumn::make('payment_status'),
+                Tables\Columns\TextColumn::make('address')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('latitude')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('longitude')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('total')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('coupon_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('discount')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('city_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('area_id')
+                    ->numeric()
+                    ->sortable(),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListOrders::route('/'),
+            'edit' => Pages\EditOrder::route('/{record}/edit'),
+        ];
+    }
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+}
+// add subtotal to order tabe in filament
