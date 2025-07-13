@@ -11,7 +11,10 @@ class OrdersLineChart extends ChartWidget
     protected static ?string $heading = 'Chart';
     protected static ?string $maxHeight = '300px';
     protected int|string|array $columnSpan = 2;
-    
+    public function getHeading(): string
+    {
+        return __('message.Order Statstics');
+    }
     protected function getData(): array
     {
         $startDate = now()->subDays(6)->startOfDay();
