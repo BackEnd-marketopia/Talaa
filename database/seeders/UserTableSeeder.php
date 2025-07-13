@@ -22,7 +22,7 @@ class UserTableSeeder extends Seeder
             'user_type' => UserType::ADMIN,
             'status' => 'active',
             'phone' => '01234567890',
-            'image' => 'storage/images/default.png',
+            'image' => 'assets/img/default.png',
         ]);
     }
 }

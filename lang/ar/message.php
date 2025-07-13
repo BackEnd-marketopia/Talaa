@@ -329,4 +329,6 @@ return [
     'Order Already Delivered' => 'الطلب تم توصيله بالفعل',
     'Invalid Status Change' => 'تغيير الحالة غير صالح',
     'Invalid Status' => 'حالة غير صالحة',
+    'Address Added' => 'تم إضافة العنوان',
+    'Talaa' => 'طلقة',
 ];

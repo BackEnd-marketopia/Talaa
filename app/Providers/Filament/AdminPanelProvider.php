@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Purple,
+                'primary' => Color::Green,
                 'secondary' => Color::Gray,
                 'info' => Color::Cyan,
                 'success' => Color::Green,
@@ -76,11 +76,12 @@ class AdminPanelProvider extends PanelProvider
             ->profile()
             ->sidebarCollapsibleOnDesktop()
             ->globalSearch(false)
-            // ->brandLogo(asset('storage/images/default.png'))
-            ->brandLogoHeight("50px")
+            ->brandLogo(asset('assets/img/logo.png'))
+            ->brandLogoHeight("70px")
             ->renderHook(
                 'panels::body.start',
                 fn() => view('filament.pages.firebase-script')
-            );
+            )
+            ->brandName(fn() => __('message.Talaa'));
     }
 }

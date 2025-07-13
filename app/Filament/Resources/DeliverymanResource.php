@@ -76,7 +76,7 @@ class DeliverymanResource extends Resource
                     ->validationAttribute(__('message.Phone')),
                 Forms\Components\FileUpload::make('image')
                     ->label(__('message.Image'))
-                    ->default('storage/images/default.png')
+                    ->default('assets/img/default.png')
                     ->directory('deliverymen')
                     ->image(),
                 Forms\Components\Select::make('status')
@@ -110,7 +110,7 @@ class DeliverymanResource extends Resource
                     ->label(__('message.Image'))
                     ->disk('public')
                     ->circular()
-                    ->defaultImageUrl(asset('storage/images/default.png')),
+                    ->defaultImageUrl(asset('assets/img/default.png')),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('message.Name'))
                     ->searchable(),

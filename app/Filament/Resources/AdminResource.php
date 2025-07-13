@@ -74,7 +74,7 @@ class AdminResource extends Resource
                 Forms\Components\FileUpload::make('image')
                     ->label(__('message.Image'))
                     ->directory('admins')
-                    ->default('storage/images/default.png')
+                    ->default('assets/img/default.png')
                     ->image(),
                 Forms\Components\Hidden::make('user_type')
                     ->default('admin')
@@ -107,7 +107,7 @@ class AdminResource extends Resource
                     ->label(__('message.Image'))
                     ->disk('public')
                     ->circular()
-                    ->defaultImageUrl(asset('storage/images/default.png')),
+                    ->defaultImageUrl(asset('assets/img/default.png')),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('message.Name'))
                     ->searchable(),

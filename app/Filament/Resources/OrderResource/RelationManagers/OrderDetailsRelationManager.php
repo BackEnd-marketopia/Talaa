@@ -55,7 +55,7 @@ class OrderDetailsRelationManager extends RelationManager
 
                         return $grouped->map(function ($items, $attributeName) {
                             $values = $items->map(function ($item) {
-                                return '<span style="padding:4px 8px; background-color:#A855F7;border-radius:6px; color:white;font-size:12px">' . e($item->attributeValue->value) . '</span>';
+                                return '<span style="padding:4px 8px; background-color:#22C55E;border-radius:6px; color:white;font-size:12px">' . e($item->attributeValue->value) . '</span>';
                             })->implode(', ');
 
                             return '<span class="text-gray-700 font-semibold" style="margin:20px 0">' . e($attributeName) . '</span>: ' . $values;

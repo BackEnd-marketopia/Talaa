@@ -50,7 +50,7 @@ class FirebaseService implements FirebaseServiceInterface
         }
 
         $client = new HttpClient();
-        $url = "https://fcm.googleapis.com/v1/projects/e-commerce-fb183/messages:send";
+        $url = "https://fcm.googleapis.com/v1/projects/talaa-2bd5f/messages:send";
 
         $topicOrToken = $type == 'topic' ? 'topic' : 'token';
         $payload = [

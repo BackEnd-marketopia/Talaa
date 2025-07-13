@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique()->nullable();
             $table->string('phone')->unique()->nullable();
-            $table->string('image')->nullable()->default('storage/images/default.png');
+            $table->string('image')->nullable()->default('assets/img/default.png');
             $table->enum('user_type', ['admin', 'user', 'deliveryman'])->default('user');
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamp('email_verified_at')->nullable();

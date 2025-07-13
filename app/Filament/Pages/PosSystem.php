@@ -891,7 +891,7 @@ class PosSystem extends Page implements HasForms
             DB::commit();
 
             Notification::make()
-                ->title('Order created successfully')
+                ->title(__('message.Order created successfully'))
                 ->success()
                 ->send();
 
@@ -907,13 +907,13 @@ class PosSystem extends Page implements HasForms
                     $this->selectedUser->id,
                     null,
                 );
-            }
-            if (!$result['success']) {
-                Notification::make()
-                    ->title('Error sending notification')
-                    ->body($result['message'])
-                    ->danger()
-                    ->send();
+                if (!$result['success']) {
+                    Notification::make()
+                        ->title('Error sending notification')
+                        ->body($result['message'])
+                        ->danger()
+                        ->send();
+                }
             }
             // Reset form and cart
             $this->form->fill();

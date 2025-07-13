@@ -58,7 +58,7 @@ class AuthService implements AuthServiceInterface
         if ($data['image'])
             $data['image'] = ImageHelpers::addImage($data['image'], 'users');
 
-        $data['image'] = $data['image'] ?? 'storage/images/default.png';
+        $data['image'] = $data['image'] ?? 'assets/img/default.png';
 
         $data['password'] = Hash::make($data['password']);
 
