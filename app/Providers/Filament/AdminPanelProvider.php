@@ -78,6 +78,7 @@ class AdminPanelProvider extends PanelProvider
             ->globalSearch(false)
             ->brandLogo(asset('assets/img/logo.png'))
             ->brandLogoHeight("70px")
+            ->favicon('assets/img/logo.png')
             ->renderHook(
                 'panels::body.start',
                 fn() => view('filament.pages.firebase-script')
