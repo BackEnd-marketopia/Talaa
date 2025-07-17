@@ -59,7 +59,7 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'image' => $request->image,
             'fcm_token' => $request->fcm_token,
-            'password' => $request->password,
+            'password' => $request->password ?? null,
         ]);
         return Response::api(__('message.Success'), 200, true, null, $result);
     }
