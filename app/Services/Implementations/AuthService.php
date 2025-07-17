@@ -90,12 +90,14 @@ class AuthService implements AuthServiceInterface
 
         $data['image'] = $data['image'] ?? $user->image;
 
-        $data['password'] = $data['password'] ?? $user->password;
+
         $data['email'] = $data['email'] ?? $user->email;
         $data['phone'] = $data['phone'] ?? $user->phone;
 
         if ($data['password'])
             $data['password'] = Hash::make($data['password']);
+        else
+            $data['password'] = $user->password;
 
         if ($data['fcm_token'])
             $this->updateFcmToken($data['fcm_token']);
