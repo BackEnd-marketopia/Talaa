@@ -92,6 +92,11 @@ class ProductResource extends Resource
                     ->searchable()
                     ->preload()
                     ->required(),
+                Forms\Components\TextInput::make('max_order_quantity')
+                    ->label(__('message.Max Order Quantity'))
+                    ->numeric()
+                    ->default(1)
+                    ->required(),
                 Forms\Components\Select::make('category_id')
                     ->label(__('message.Category'))
                     ->relationship('category', app()->getLocale() === 'ar' ? 'name_ar' : 'name_en')
@@ -103,7 +108,8 @@ class ProductResource extends Resource
                     ->relationship('brand', app()->getLocale() === 'ar' ? 'name_ar' : 'name_en')
                     ->searchable()
                     ->required()
-                    ->preload(),
+                    ->preload()
+                    ->columnSpanFull(),
                 Forms\Components\Repeater::make('images')
                     ->label(__('message.Images'))
                     ->relationship()
@@ -154,6 +160,10 @@ class ProductResource extends Resource
                     ->boolean()
                     ->icon(fn($state) => $state === ProductStatus::ACTIVE ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
                     ->color(fn($state) => $state === ProductStatus::ACTIVE ? 'success' : 'danger'),
+                Tables\Columns\TextColumn::make('max_order_quantity')
+                    ->label(__('message.Max Order Quantity'))
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('category.name_en')
                     ->label(__('message.Category'))
                     ->sortable()

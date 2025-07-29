@@ -19,6 +19,7 @@ class Product extends Model
         'status',
         'brand_id',
         'category_id',
+        'max_order_quantity',
     ];
     protected $casts = [
         'status' => ProductStatus::class,

@@ -23,7 +23,8 @@ class ProductRepository implements ProductRepositoryInterface
                 'quantity',
                 'status',
                 'category_id',
-                'brand_id'
+                'brand_id',
+                'max_order_quantity'
             )
             ->findOrFail($id);
     }

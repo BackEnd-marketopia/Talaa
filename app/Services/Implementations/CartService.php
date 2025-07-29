@@ -7,6 +7,7 @@ use App\Repository\Contracts\CartRepositoryInterface;
 use App\Repository\Contracts\ProductRepositoryInterface;
 use App\Services\Contracts\CartServiceInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CartService implements CartServiceInterface
 {
@@ -52,6 +53,12 @@ class CartService implements CartServiceInterface
             }
         }
         $product = $this->productRepo->find($data['product_id']);
+        if ($product->max_order_quantity && $data['quantity'] > $product->max_order_quantity)
+            return [
+                'success' => false,
+                'message' => __('message.Maximum Product quantity is') . ' ' . $product->max_order_quantity
+            ];
+
         if ($product->quantity < $data['quantity'])
             return [
                 'success' => false,
@@ -108,6 +115,11 @@ class CartService implements CartServiceInterface
             ];
         $product = $this->productRepo->find($cart->product_id);
 
+        if ($product->max_order_quantity && $quantity > $product->max_order_quantity)
+            return [
+                'success' => false,
+                'message' => __('message.Maximum Product quantity is') . ' ' . $product->max_order_quantity
+            ];
         if ($product->quantity < $quantity)
             return [
                 'success' => false,

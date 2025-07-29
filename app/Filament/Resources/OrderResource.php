@@ -208,6 +208,7 @@ class OrderResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('address.address')
                     ->label(__('message.Address'))
+                    ->limit(50)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('order.coupon.code')
                     ->label(__('message.Coupon'))
@@ -295,6 +296,12 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('print')
+                    ->label(__('message.Print Invoice'))
+                    ->color('secondary')
+                    ->icon('heroicon-o-printer')
+                    ->url(fn(Order $record) => route('admin.orders.invoice', $record))
+                    ->openUrlInNewTab(),
 
             ])
             ->bulkActions([

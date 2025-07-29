@@ -84,6 +84,41 @@ class ConfigResource extends Resource
                 Forms\Components\TextInput::make('whatsapp')
                     ->label(__('message.Whatsapp'))
                     ->columnSpanFull(),
+                Forms\Components\Toggle::make('discount_enabled')
+                    ->label(__('message.Discount Enabled'))
+                    ->default(false)
+                    ->live()
+                    ->columnSpanFull(),
+                Forms\Components\Select::make('discount_type')
+                    ->label(__('message.Discount Type'))
+                    ->options([
+                        'percentage' => __('message.Percentage'),
+                        'fixed' => __('message.Fixed'),
+                    ])
+                    ->default('percentage')
+                    ->columnSpanFull()
+                    ->visible(fn(callable $get) => $get('discount_enabled')),
+                Forms\Components\TextInput::make('discount_value')
+                    ->label(__('message.Discount Value'))
+                    ->numeric()
+                    ->default(0.00)
+                    ->columnSpanFull()
+                    ->visible(fn(callable $get) => $get('discount_enabled')),
+                Forms\Components\TextInput::make('min_order_total_for_discount')
+                    ->label(__('message.Min Order Total for Discount'))
+                    ->numeric()
+                    ->default(0.00)
+                    ->columnSpanFull()
+                    ->visible(fn(callable $get) => $get('discount_enabled')),
+                Forms\Components\Textarea::make('discount_description')
+                    ->label(__('message.Discount Description'))
+                    ->nullable()
+                    ->columnSpanFull()
+                    ->visible(fn(callable $get) => $get('discount_enabled')),
+                Forms\Components\Toggle::make('enable_online_payment')
+                    ->label(__('message.Enable Online Payment'))
+                    ->default(false)
+                    ->columnSpanFull()
             ]);
     }
 

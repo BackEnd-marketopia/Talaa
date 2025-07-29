@@ -11,7 +11,7 @@ class AddressRepository implements AddressRepositoryInterface
     public function find(int $id)
     {
         return Address::with(['city' => function ($query) {
-            $query->select('id', app()->getLocale() == 'ar' ? 'name_ar as name' : 'name_en as name');
+            $query->select('id', app()->getLocale() == 'ar' ? 'name_ar as name' : 'name_en as name', 'min_price');
         }])->findOrFail($id);
     }
     public function create(array $data)

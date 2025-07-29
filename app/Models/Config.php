@@ -22,5 +22,11 @@ class Config extends Model
         'linkedin',
         'tiktok',
         'whatsapp',
+        'discount_enabled',
+        'discount_type',
+        'discount_value',
+        'min_order_total_for_discount',
+        'discount_description',
+        'enable_online_payment',
     ];
 }

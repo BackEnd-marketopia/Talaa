@@ -13,6 +13,7 @@ use App\Services\Contracts\FirebaseServiceInterface;
 use App\Services\Contracts\OrderServiceInterface;
 use App\Services\Contracts\PaymobServiceInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderService implements OrderServiceInterface
 {
@@ -70,6 +71,13 @@ class OrderService implements OrderServiceInterface
             ];
 
         $subtotal = PriceHelpers::calcolatePriceForCart($carts);
+        $address = $this->addressRepo->find($data['address_id']);
+
+        if ($address->city->min_price > $subtotal['total_price_after_discount'])
+            return [
+                'success' => false,
+                'message' => __('message.Minimum Price For Orders') . ' ' . $address->city->min_price,
+            ];
 
         $devaliveryFee = $this->deliveryFeeService->calculateDeliveryFee($data['address_id'], $data['area_id']);
 

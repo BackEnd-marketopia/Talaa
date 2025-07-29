@@ -52,6 +52,13 @@ class CityResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->ColumnSpanFull(),
+                Forms\Components\TextInput::make('min_price')
+                    ->label(__('message.Minimum Price For Orders'))
+                    ->numeric()
+                    ->default(0.00)
+                    ->required()
+                    ->helperText(__('message.Add 0 if no minimum price is set'))
+                    ->ColumnSpanFull(),
             ]);
     }
 
@@ -65,6 +72,10 @@ class CityResource extends Resource
                 Tables\Columns\TextColumn::make('name_en')
                     ->label(__('message.Name in English'))
                     ->searchable(),
+                Tables\Columns\TextColumn::make('min_price')
+                    ->label(__('message.Minimum Price For Orders'))
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('message.Created At'))
                     ->dateTime()
