@@ -344,7 +344,7 @@ return [
     'Order Already Delivered' => 'Order Already Delivered',
     'Invalid Status Change' => 'Invalid Status Change',
     'Invalid Status' => 'Invalid Status',
-    'Talaa' => 'Talaa',
+    'Talaa' => 'Talqa',
     'Fixed' => 'Fixed',
     'Discount Enabled' => 'Discount Enabled',
     'Min Order Total for Discount' => 'Min Order Total for Discount',
