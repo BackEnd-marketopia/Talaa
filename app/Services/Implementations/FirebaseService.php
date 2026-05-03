@@ -7,6 +7,7 @@ use App\Services\Contracts\FirebaseServiceInterface;
 use Google\Client as GoogleClient;
 use Google\Service\FirebaseCloudMessaging;
 use GuzzleHttp\Client as HttpClient;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -19,12 +20,65 @@ class FirebaseService implements FirebaseServiceInterface
     }
     public function getFirebaseAccessToken()
     {
-        $keyFilePath = storage_path('firebase/credintials.json');
-        $googleClient = new GoogleClient();
-        $googleClient->setAuthConfig($keyFilePath);
-        $googleClient->addScope(FirebaseCloudMessaging::CLOUD_PLATFORM);
-        $googleClient->fetchAccessTokenWithAssertion();
-        return $googleClient->getAccessToken()['access_token'] ?? null;
+        $keyFilePath = $this->getFirebaseCredentialsPath();
+
+        if (!File::exists($keyFilePath)) {
+            Log::error('Firebase credentials file was not found.', [
+                'path' => $keyFilePath,
+            ]);
+
+            return null;
+        }
+
+        $credentials = json_decode(File::get($keyFilePath), true);
+
+        if (!is_array($credentials) || ! $this->hasValidServiceAccountCredentials($credentials)) {
+            Log::error('Firebase credentials file is invalid. Please upload a Firebase service account JSON file.', [
+                'path' => $keyFilePath,
+            ]);
+
+            return null;
+        }
+
+        try {
+            $googleClient = new GoogleClient();
+            $googleClient->setAuthConfig($credentials);
+            $googleClient->addScope(FirebaseCloudMessaging::CLOUD_PLATFORM);
+            $googleClient->fetchAccessTokenWithAssertion();
+
+            return $googleClient->getAccessToken()['access_token'] ?? null;
+        } catch (\Throwable $exception) {
+            Log::error('Failed to get Firebase access token.', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    private function hasValidServiceAccountCredentials(array $credentials): bool
+    {
+        foreach (['type', 'project_id', 'private_key', 'client_email', 'token_uri'] as $key) {
+            if (empty($credentials[$key])) {
+                return false;
+            }
+        }
+
+        return $credentials['type'] === 'service_account';
+    }
+
+    private function getFirebaseCredentialsPath(): string
+    {
+        $configuredPath = config('services.firebase.credentials');
+
+        if (!empty($configuredPath)) {
+            return $configuredPath;
+        }
+
+        $defaultPath = storage_path('firebase/credentials.json');
+        $legacyPath = storage_path('firebase/credintials.json');
+
+        return File::exists($defaultPath) ? $defaultPath : $legacyPath;
     }
 
     public function sendNotification($title, $body, $type, $to, $save = false, $user_id = null, $image = null, $data = null)
